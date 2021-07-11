@@ -30,19 +30,24 @@ func main() {
 	log.Infof("Welcome to a game of Snakes and Ladders with Swati & Vinay ")
 	var winner *model.Player
 
-	ladderPos := []int{5, 50, 15, 97}
-	snakePos := []int{51, 0, 99, 11, 34, 6, 89, 10, 71, 21}
+	//ladderPos := []int{5, 50, 15, 97}
+	//snakePos := []int{51, 0, 99, 11, 34, 6, 89, 10, 71, 21}
 
 	players := model.GetAllPlayers()
 
 	InitializeRelevantChannels()
 
-	board := model.PrepareGameBoard(ladderPos, snakePos, players, winnerChannel)
+	board := model.PrepareTicTacToeBoard(players, winnerChannel, endGame)
 	go board.Play()
+
+
+	//board := model.PrepareGameBoard(ladderPos, snakePos, players, winnerChannel)
+	//go board.Play()
 
 	winner = <-winnerChannel
 	endGame <- true
 	board.SetGameStatus(model.ENDED)
+
 	log.Infof("Got a winner %v", winner.Name)
 	return
 

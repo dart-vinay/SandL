@@ -1,13 +1,14 @@
 package model
 
 import (
+	"fmt"
 	"github.com/labstack/gommon/log"
 	"math/rand"
 	"time"
 )
 
 type Player struct {
-	Id         string
+	Id         int
 	Name       string
 	Colour     string
 	CurrentPos int
@@ -26,20 +27,46 @@ func (player *Player) Move(board Board) error {
 	if gameStatus != INPROGRESS {
 		return nil
 	}
-	rolledVal := player.Roll((board).GetPlayerCount(), board, 0)
+	boardType := board.GetGameType()
 
-	if player.CurrentPos+rolledVal == 100 {
-		board.GetChannel() <- player
+	if boardType == TicTacToe {
+		var currPos int
+		fmt.Print("Play your Move")
+
+		for {
+			fmt.Scanf("%d", &currPos)
+			if (currPos < 9) && (currPos > -1) {
+				break
+			}
+			fmt.Print("Invalid Move. Play Again.")
+		}
+
+		// Positional validation needs to be done. One position cannot be played again
+		board.(*TicTacToeBoard).SetPositionValue(currPos, board.GetPlayers()[board.GetPossession()].Id)
+		if board.(*TicTacToeBoard).CheckWinner() {
+			log.Infof("Winner Found for TicTacToe game %v ", board.GetPlayers()[board.GetPossession()])
+			board.GetChannel() <- &board.GetPlayers()[board.GetPossession()]
+		}
+		board.(*TicTacToeBoard).ChangePossession()
+
+	} else if boardType == SnakesAndLadder {
+		rolledVal := player.Roll((board).GetPlayerCount(), board, 0)
+
+		if player.CurrentPos+rolledVal == 100 {
+			board.GetChannel() <- player
+		}
+
+		newPos := player.CurrentPos + rolledVal
+		if (board).IsSpecialPosition(newPos) {
+			typePos := (board).GetSpecialPosition(newPos).Type
+			newPos = (board).GetSpecialPosition(newPos).End
+			log.Infof("Caught at special position %v Player %v , OldPos %v Newpos %v", typePos, player.Name, player.CurrentPos, newPos)
+		}
+		player.SetCurrentPos(newPos)
+		log.Infof("Player %v moved to position %v", player.Name, player.CurrentPos)
+
 	}
 
-	newPos := player.CurrentPos + rolledVal
-	if (board).IsSpecialPosition(newPos) {
-		typePos := (board).GetSpecialPosition(newPos).Type
-		newPos  = (board).GetSpecialPosition(newPos).End
-		log.Infof("Caught at special position %v Player %v , OldPos %v Newpos %v", typePos, player.Name, player.CurrentPos, newPos)
-	}
-	player.SetCurrentPos(newPos)
-	log.Infof("Player %v moved to position %v", player.Name, player.CurrentPos )
 	return nil
 }
 
@@ -99,8 +126,8 @@ func (player *Player) GetCurrentPos() int {
 
 func GetAllPlayers() []Player {
 	playerList := []Player{
-		{"1", "Vinay", "Blue", 0},
-		{"2", "Swati", "Green", 0},
+		{1, "Vinay", "Blue", 0},
+		{2, "Swati", "Green", 0},
 	}
 	return playerList
 }

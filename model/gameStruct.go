@@ -17,7 +17,7 @@ type Board interface {
 	GetPlayerCount() int
 	GetGameStatus() GameStatus
 	SetGameStatus(status GameStatus)
-
+	GetGameType() string
 	Play()
 	GetChannel() chan *Player
 	//EndGame()
@@ -29,6 +29,7 @@ type GameBoard struct {
 	Possession      int
 	Status          GameStatus
 	Channel         chan *Player
+	Type            string
 }
 
 type (
@@ -44,12 +45,17 @@ const (
 	INPROGRESS = GameStatus("PROGRESS")
 	ENDED      = GameStatus("ENDED")
 	NOTSTARTED = GameStatus("NOTSTARTED")
+
+	TicTacToe = "TicTacToe"
+	SnakesAndLadder = "Snakes&Ladders"
 )
 
 type Position struct {
 	Initial int
 	End     int
 	Type    CellType
+
+	Value int
 }
 
 func (gameBoard *GameBoard) IsSpecialPosition(pos int) bool {
@@ -118,6 +124,10 @@ func (gameBoard *GameBoard) SetGameStatus(gameStatus GameStatus) {
 	gameBoard.Status = gameStatus
 }
 
+func (gameBoard *GameBoard) GetGameType() string {
+	return gameBoard.Type
+}
+
 func (gameBoard *GameBoard) GetGameStatus() GameStatus {
 	return (*gameBoard).Status
 }
@@ -127,11 +137,12 @@ func (gameBoard *GameBoard) GetChannel() chan *Player {
 }
 func PrepareGameBoard(ladderPos, snakePos []int, players []Player, channel chan *Player) Board {
 	gameBoard := GameBoard{
-		Players:    players,
-		Possession: 0,
-		Status:     NOTSTARTED,
-		Channel:    channel,
+		Players:         players,
+		Possession:      0,
+		Status:          NOTSTARTED,
+		Channel:         channel,
 		SpecialPosition: make(map[int]Position),
+		Type:            "Snakes&Ladders",
 	}
 	specialPositions := []Position{}
 
