@@ -14,8 +14,8 @@ type Player struct {
 }
 
 type PlayerActivity interface {
-	Move(*Board) error
-	Roll(totalPlayers int, board *Board, startingVal int) int // Return a positional increment and also consider that player will roll again if he gets a six.
+	Move(Board) error
+	Roll(totalPlayers int, board Board, startingVal int) int // Return a positional increment and also consider that player will roll again if he gets a six.
 	GetCurrentPos() int
 	SetCurrentPos(int)
 }
